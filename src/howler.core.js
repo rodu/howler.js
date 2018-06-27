@@ -796,13 +796,19 @@
             if (sprite !== '__default' || sound._loop) {
               self._endTimers[sound._id] = setTimeout(self._ended.bind(self, sound), timeout);
             } else {
+              var forcedEndTimeoutId = 0;
               self._endTimers[sound._id] = function() {
                 // Fire ended on this audio node.
                 self._ended(sound);
 
+                if (forcedEndTimeoutId) {
+                  clearTimeout(forcedEndTimeoutId);
+                  forcedEndTimeoutId = 0;
+                }
                 // Clear this listener.
                 node.removeEventListener('ended', self._endTimers[sound._id], false);
               };
+              forcedEndTimeoutId = setTimeout(self._endTimers[sound._id], timeout + 2000);
               node.addEventListener('ended', self._endTimers[sound._id], false);
             }
           } catch (err) {
